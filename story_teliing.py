@@ -131,6 +131,9 @@ async def main():
             output_file
         )
 
+        remove(audio['audio_path'])
+        remove(audio['subtitle_path'])
+
 if __name__ == "__main__":
     # if system() == 'Windows':
     #     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
