@@ -38,6 +38,6 @@ class Video:
             .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold') \
 
         # Render video
-        video = output(background, audio, filename=filename, threads=f"{cpu_count()}", t=10)
+        video = output(background, audio, filename=filename, threads=f"{cpu_count()}")
         video = overwrite_output(video)
         run(video)
