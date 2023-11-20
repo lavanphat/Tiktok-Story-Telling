@@ -3,7 +3,7 @@ from asyncio import get_event_loop
 from pathlib import Path
 from sys import exit
 from src.reddit import Reddit
-from src.console import Console
+from src.logger import Logger
 from src.tts import EdgeTTS
 from src.openai_whisper import Whisper
 from src.youtube import PyYoutube
@@ -14,7 +14,7 @@ from nltk import download, sent_tokenize
 
 
 async def main():
-    console.info("Tiktok Story Telling is running...")
+    log.info("Tiktok Story Telling is running...")
     output_dir = f"{HOME}/output"
     makedirs(output_dir, exist_ok=True)
 
@@ -32,7 +32,7 @@ async def main():
     # Random voice
     edge_tts = EdgeTTS()
     voice = await edge_tts.random_voices()
-    console.success(f"Choice voice {voice}")
+    log.info(f"Choice voice {voice}")
     
     # Scrape posts from Reddit
     reddit = Reddit()
@@ -42,17 +42,17 @@ async def main():
     # Filter post
     for item in posts:
         # Convert content post to tts
-        console.info(f"Checking post {item['title']}")
+        log.info(f"Checking post {item['title']}")
         content_path = await edge_tts.tts(item['selftext'], f"{output_dir}/temp.mp3")
         
         # Skip if content audio < 60 seconds
         content_audio = AudioSegment.from_file(content_path)
         remove(content_path)
         if content_audio.duration_seconds < 60:
-            console.info(f"Skip this post")
+            log.info(f"Skip this post")
             continue
         
-        console.success(f"Choice this post with audio time {content_audio.duration_seconds}")
+        log.info(f"Choice this post with audio time {content_audio.duration_seconds}")
         post = item
         break
     
@@ -64,16 +64,16 @@ async def main():
     # Create sentences from content
     download('punkt', quiet=True)
     sentences = sent_tokenize(post['selftext'])
-    console.success(f"Splited content to sentences")
+    log.info(f"Splited content to sentences")
 
     # Create folder output for this post
     post_dir = f"{output_dir}/{post['title'].replace(' ', '_').lower()}"
     makedirs(post_dir, exist_ok=True)
-    console.success(f"Created folder output for this post")
+    log.info(f"Created folder output for this post")
 
     # OpenAI-Whisper Model
     whisper = Whisper(args.model)
-    console.success(f"OpenAI-Whisper model loaded successfully ({args.model})")
+    log.info(f"OpenAI-Whisper model loaded successfully ({args.model})")
 
     # Create audio and subtitle for post from sentences
     combined_audio = AudioSegment.empty()
@@ -97,7 +97,7 @@ async def main():
         combined_audio = AudioSegment.from_file(title_path) + combined_audio
         audio_path = f"{post_dir}/audio-part-{len(audio_paths)+1}.mp3"
         combined_audio.export(audio_path)
-        console.success(f"Created audio for part {len(audio_paths)+1}")
+        log.info(f"Created audio for part {len(audio_paths)+1}")
 
         # Create subtitles for content audio
         whisper.srt_create(audio_path, post_dir)
@@ -108,17 +108,17 @@ async def main():
         remove(title_path)              
 
     # if combined_audio.duration_seconds > 0:
-    #     console.info(f"Created audio for part backup")
+    #     log.info(f"Created audio for part backup")
     #     combined_audio.export(f"{post_dir}/audio-part-backup.mp3")
 
     #     videos[-1]['text'] += text
     
-    console.success(f"Created audio and subtitle successfully!")
+    log.info(f"Created audio and subtitle successfully!")
     
     # Download background
     py_youtube = PyYoutube()
     background_path = py_youtube.download_video(args.url, f"{HOME}/background")
-    console.success(f"Downloaded background")
+    log.info(f"Downloaded background")
     
     # Create videos
     video = Video()
@@ -139,13 +139,13 @@ if __name__ == "__main__":
     #     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
     loop = get_event_loop()
-    console = Console()
+    log = Logger()
     HOME = Path.cwd()
     try:
         loop.run_until_complete(main())
     except Exception as e:
         loop.close()
-        console.error(e)
+        log.error(e)
     finally:
         loop.close()
 
