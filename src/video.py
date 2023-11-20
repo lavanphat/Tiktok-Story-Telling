@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 from time import strptime
-from ffmpeg import input, output, overwrite_output, run, probe, concat
+from ffmpeg import input, output, overwrite_output, run, probe
+from pydub import AudioSegment
 
 class Video:
     def get_info(self, path: str):
@@ -32,12 +33,14 @@ class Video:
 
     def create_story_telling(self, audio_path: str, background_path: str, subtitle_path: str, filename: str):
         audio = input(audio_path)
+        audio_duration = AudioSegment.from_file(audio).duration_seconds
+
         background = input(background_path).video \
             .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 'ih/16*9', 'ih') \
-            .filter('scale', '1080', '1920')\
-            .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold') \
+            .filter('scale', '1080', '1920') \
+            .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold')
 
         # Render video
-        video = output(background, audio, filename=filename, threads=f"{cpu_count()}")
+        video = output(background, audio, t=audio_duration, filename=filename, threads=f"{cpu_count()}")
         video = overwrite_output(video)
         run(video)
