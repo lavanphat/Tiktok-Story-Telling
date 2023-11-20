@@ -33,7 +33,7 @@ class Video:
 
     def create_story_telling(self, audio_path: str, background_path: str, subtitle_path: str, filename: str):
         audio = input(audio_path)
-        audio_duration = AudioSegment.from_file(audio).duration_seconds
+        audio_duration = AudioSegment.from_file(audio_path).duration_seconds
 
         background = input(background_path).video \
             .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 'ih/16*9', 'ih') \
