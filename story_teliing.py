@@ -67,7 +67,7 @@ async def main():
     log.info(f"Splited content to sentences")
 
     # Create folder output for this post
-    post_dir = f"{output_dir}/{post['title'].replace(' ', '_').lower()}"
+    post_dir = f"{output_dir}/{post['id']}"
     makedirs(post_dir, exist_ok=True)
     log.info(f"Created folder output for this post")
 
@@ -101,8 +101,8 @@ async def main():
 
         # Create subtitles for content audio
         whisper.srt_create(audio_path, post_dir)
-        whisper.format_subtitle(audio_path)
         subtitle_path = audio_path.replace('mp3', 'srt')
+        whisper.format_subtitle(subtitle_path)
 
         audio_paths.append({'audio_path': audio_path, 'subtitle_path': subtitle_path})
         combined_audio = AudioSegment.empty()  

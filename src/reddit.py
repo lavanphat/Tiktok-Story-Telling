@@ -16,6 +16,7 @@ class Reddit:
     for post in response.json()["data"]["children"]:
       post = post["data"]
       results.append({
+          'id': post['id'],
           'url': post['url'],
           'selftext': post['selftext'],
           'title': post['title'],
