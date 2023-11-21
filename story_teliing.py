@@ -101,6 +101,7 @@ async def main():
 
         # Create subtitles for content audio
         whisper.srt_create(audio_path, post_dir)
+        whisper.format_subtitle(audio_path)
         subtitle_path = audio_path.replace('mp3', 'srt')
 
         audio_paths.append({'audio_path': audio_path, 'subtitle_path': subtitle_path})
