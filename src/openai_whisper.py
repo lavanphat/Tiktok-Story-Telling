@@ -21,7 +21,8 @@ class Whisper:
         word_options = {
             "highlight_words": True,
             "max_line_count": 1,
-            "max_line_width": 10,
+            # "max_line_width": 10,
+            "max_words_per_line": 1,
             "preserve_segments": False,
         }
 
