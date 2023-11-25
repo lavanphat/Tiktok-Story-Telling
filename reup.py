@@ -2,15 +2,16 @@ from os import makedirs, remove
 from src.logger import Logger
 from src.video import Video
 from src.youtube import PyYoutube
+from src.font import Font
 from pathlib import Path
 from argparse import ArgumentParser
 from ffmpeg import input, run, output, overwrite_output
 from PIL import ImageFont
 
 
-def text_wrap(text, max_width):
+def text_wrap(text: str, max_width: int, font: str):
     lines = []
-    font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 75)
+    font = ImageFont.truetype(font, 75)
     max_width -= 10
     # If the width of the text is smaller than image width
     # we don't need to split it, just add it to the lines array
@@ -38,6 +39,7 @@ def text_wrap(text, max_width):
 def main():
     parser = ArgumentParser()
     parser.add_argument("--url", required=True, help="Youtube URL to download video.", type=str)
+    parser.add_argument("--font_url", default='https://www.dafontfree.net/data/36/t/128322/typewriter-serial-heavy-regular.ttf', help="URL font will download.", type=str)
     parser.add_argument("--num_parts", required=True, help="Number parts.", type=int)
     parser.add_argument("--title", required=True, help="Number parts.", type=str)
     args = parser.parse_args()
@@ -49,15 +51,20 @@ def main():
     
     output_dir = f"{HOME}/output"
     makedirs(output_dir, exist_ok=True)
+    
+    # Download font
+    font = Font()
+    font_path = font.download(args.font_url, f"{HOME}/fonts")
+    log.info("Download font success")
 
     # Wrap video title
-    video_title_wrap = text_wrap(args.title, 1080)
+    video_title_wrap = text_wrap(args.title, 1080, font_path)
     log.info("Wrap text success")
 
     # Download video
     py_youtube = PyYoutube()
     log.info(f"Downloading video")
-    video_path = py_youtube.download_video(args.url, f"{HOME}/background")
+    video_path = py_youtube.download_video(args.url, f"{HOME}/backgrounds")
     log.info(f"Downloaded video")
 
     # Render video
@@ -80,13 +87,13 @@ def main():
                     .filter('scale', 'iw*1.5', 'ih*1.5') \
                     .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 1080, 'ih') \
                     .filter('pad', 1080, 1920, '(ow-iw)/2', '(oh-ih)/2') \
-                    .drawtext(f"Part {i+1}", '(w-tw)/2', 'h-(420/2)', fontcolor='white', fontsize=100)
+                    .drawtext(f"Part {i+1}", '(w-tw)/2', 'h-(420/2)', fontfile=font_path, fontcolor='white', fontsize=100)
         
         fontsize = 75
         padding_top = (1920 - 720 * 1.5)/2
         drawtext_y = (padding_top - fontsize * len(video_title_wrap)) / 2
         for idx, title in enumerate(video_title_wrap):
-            video = video.drawtext(title, '(w-tw)/2', drawtext_y + fontsize * idx, fontcolor='white', fontsize=fontsize, line_spacing=10)
+            video = video.drawtext(title, '(w-tw)/2', drawtext_y + fontsize * idx, fontcolor='white', fontsize=fontsize, fontfile=font_path)
 
         # Render video
         output_name = f"{output_dir}/{args.title} part {i + 1}.mp4"

@@ -163,7 +163,10 @@ cython_debug/
 media/*
 
 # background folder
-background/*
+backgrounds/*
 
 # output folder
 output/*
+
+# output folder
+fonts/*
