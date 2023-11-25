@@ -83,14 +83,10 @@ def main():
 
         start_time = i * part_duration
         end_time = min((i + 1) * part_duration, duration)
-        video_input = input(video_path, ss=start_time, to=end_time)
 
-        # Render audio
-        audio = video_input.audio.filter('atempo', 1.1)
+        # Split audio from video
         audio_path = f"{output_dir}/audio.mp3"
-        audio_stream = output(audio, audio_path)
-        audio_stream = overwrite_output(audio_stream)
-        run(audio_stream)
+        video.split_audio(video_path, start_time, end_time, audio_path)
         
         # Create subtitles for content audio
         whisper.srt_create(audio_path, output_dir)
@@ -99,29 +95,20 @@ def main():
         remove(audio_path)
 
         # Edit video
-        video = video_input.video \
-                    .setpts('(PTS-STARTPTS)/1.1') \
-                    .filter('scale', 'iw*1.5', 'ih*1.5') \
-                    .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 1080, 'ih') \
-                    .filter('pad', 1080, 1920, '(ow-iw)/2', '(oh-ih)/2') \
-                    .drawtext(f"Part {i+1}", '(w-tw)/2', 'h-(420/2)', fontfile=font_path, fontcolor='white', fontsize=100)  \
-                    .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold')
-    
-        fontsize = 75
-        padding_top = (1920 - 720 * 1.5)/2
-        drawtext_y = (padding_top - fontsize * len(video_title_wrap)) / 2
-        for idx, title in enumerate(video_title_wrap):
-            video = video.drawtext(title, '(w-tw)/2', drawtext_y + fontsize * idx, fontcolor='white', fontsize=fontsize, fontfile=font_path)
-
-        # Render video
-        output_name = f"{output_dir}/{args.title} part {i + 1}.mp4"
-        output_stream = output(video, audio, output_name)
-        output_stream = overwrite_output(output_stream)
-        run(output_stream)
+        output_path = f"{output_dir}/{args.title} part {i + 1}.mp4"
+        video.reup(
+            video_path,
+            font_path,
+            subtitle_path,
+            start_time,
+            end_time,
+            output_path,
+            video_title_wrap,
+            f"Part {i + 1}"
+        )
 
     # Remove resources files
     remove(video_path)
-
 
 if __name__ == "__main__":
     main()
