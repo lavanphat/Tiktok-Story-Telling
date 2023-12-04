@@ -92,7 +92,6 @@ def main():
         whisper.srt_create(audio_path, output_dir)
         subtitle_path = audio_path.replace('mp3', 'srt')
         whisper.format_subtitle(subtitle_path)
-        remove(audio_path)
 
         # Edit video
         output_path = f"{output_dir}/{args.title} part {i + 1}.mp4"
