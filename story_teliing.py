@@ -8,7 +8,7 @@ from src.tts import EdgeTTS
 from src.openai_whisper import Whisper
 from src.youtube import PyYoutube
 from src.video import Video
-from os import makedirs, remove
+from os import makedirs, remove, path
 from pydub import AudioSegment
 from nltk import download, sent_tokenize
 
@@ -42,6 +42,10 @@ async def main():
     post = None
     # Filter post
     for item in posts:
+        # Skip this post if exist
+        if path.exists(f"{output_dir}/{post['id']}"):
+            continue
+
         # Convert content post to tts
         log.info(f"Checking post {item['title']}")
         content_path = await edge_tts.tts(item['selftext'], f"{output_dir}/temp.mp3")
