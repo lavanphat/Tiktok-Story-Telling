@@ -43,7 +43,7 @@ async def main():
     # Filter post
     for item in posts:
         # Skip this post if exist
-        if path.exists(f"{output_dir}/{post['id']}"):
+        if path.exists(f"{output_dir}/{item['id']}"):
             continue
 
         # Convert content post to tts
