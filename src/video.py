@@ -1,11 +1,12 @@
 from multiprocessing import cpu_count
+from random import randrange
 from time import strptime
-from typing import List
+from typing import List, Tuple
 from ffmpeg import input, output, overwrite_output, run, probe
 from pydub import AudioSegment
 
 class Video:
-    def get_info(self, path: str):
+    def __get_info(self, path: str):
         """
         Get information about a video file.
 
@@ -36,7 +37,11 @@ class Video:
         audio = input(audio_path)
         audio_duration = AudioSegment.from_file(audio_path).duration_seconds
 
-        background = input(background_path).video \
+        # Random start end video background
+        background_info = self.__get_info(background_path)
+        start, end = self.__get_start_and_end_times(audio_duration, background_info['duration'])
+
+        background = input(background_path, ss=start, to=end).video \
             .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 'ih/16*9', 'ih') \
             .filter('scale', '1080', '1920') \
             .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold')
@@ -79,3 +84,22 @@ class Video:
         output_stream = overwrite_output(output_stream)
         run(output_stream)
 
+    def __get_start_and_end_times(self, video_length: int, background_video_duration: int) -> Tuple[int, int]:
+        """Generates a random interval of time to be used as the background of the video.
+
+        Args:
+            video_length (int): Length of the video
+            background_video_duration (int): Length of the video to be used as the background
+
+        Returns:
+            tuple[int,int]: Start and end time of the randomized interval
+        """
+        initialValue = 0
+        # Ensures that will be a valid interval in the video
+        while int(background_video_duration) <= int(video_length + initialValue):
+            if initialValue == initialValue // 2:
+                raise Exception("Your background is too short for this video length")
+            else:
+                initialValue //= 2  # Divides the initial value by 2 until reach 0
+        random_time = randrange(initialValue, int(background_video_duration) - int(video_length))
+        return random_time, random_time + video_length
