@@ -6,7 +6,7 @@ from ffmpeg import input, output, overwrite_output, run, probe
 from pydub import AudioSegment
 
 class Video:
-    def __get_info(self, path: str):
+    def get_info(self, path: str):
         """
         Get information about a video file.
 
@@ -38,7 +38,7 @@ class Video:
         audio_duration = AudioSegment.from_file(audio_path).duration_seconds
 
         # Random start end video background
-        background_info = self.__get_info(background_path)
+        background_info = self.get_info(background_path)
         start, end = self.__get_start_and_end_times(audio_duration, background_info['duration'])
 
         background = input(background_path, ss=start, to=end).video \
