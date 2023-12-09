@@ -129,7 +129,7 @@ async def main():
     # Create videos
     video = Video()
     for idx, audio in enumerate(audio_paths):
-        output_file = f"{post_dir}/{post['title']} part {idx+1}.mp4"
+        output_file = f"{post_dir}/{post['title'].replace('"', '')} part {idx+1}.mp4"
         video.create_story_telling(
             audio['audio_path'], 
             background_path, 
