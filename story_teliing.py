@@ -19,11 +19,13 @@ async def main():
     makedirs(output_dir, exist_ok=True)
 
     parser = ArgumentParser()
-    parser.add_argument("--model", default="small", help="Model to use", choices=["tiny", "base", "small", "medium", "large"], type=str)
-    # parser.add_argument("--non_english", action='store_true', help="Don't use the english model.")
-    parser.add_argument("--url", default="https://www.youtube.com/watch?v=FvSqM5EKEeg", help="Youtube URL to download as background video.", type=str)
     parser.add_argument("--sub_reddit", help="Enter subreddits in reddit. Example: relationships,TwoXChromosomes", type=str, required=True)
+    parser.add_argument("--client_id", help="The ID of your Reddit app of SCRIPT type", type=str, required=True)
+    parser.add_argument("--client_secret ", help="The SECRET of your Reddit app of SCRIPT type", type=str, required=True)
+    parser.add_argument("--model", default="small", help="Model to use", choices=["tiny", "base", "small", "medium", "large"], type=str)
+    parser.add_argument("--url", default="https://www.youtube.com/watch?v=FvSqM5EKEeg", help="Youtube URL to download as background video.", type=str)
     parser.add_argument("--list-voices", help="Use `edge-tts --list-voices` to list all voices", action='help')
+    # parser.add_argument("--non_english", action='store_true', help="Don't use the english model.")
     # parser.add_argument("--tts", default="en-US-ChristopherNeural", help="Voice to use for TTS", type=str)
     # parser.add_argument("--random_voice", action='store_true', help="Random voice for TTS", default=False)
     # parser.add_argument("--gender", choices=["Male", "Female"], help="Gender of the random TTS voice", type=str)
@@ -37,7 +39,7 @@ async def main():
     
     # Scrape posts from Reddit
     reddit = Reddit()
-    posts = reddit.get_post(args.sub_reddit.replace(',', '+'))
+    posts = reddit.get_posts_from_api(args.client_id, args.client_secret ,args.sub_reddit.replace(',', '+'))
 
     post = None
     # Filter post
