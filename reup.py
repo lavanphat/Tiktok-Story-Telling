@@ -40,7 +40,7 @@ def text_wrap(text: str, max_width: int, font: str):
 def main():
     parser = ArgumentParser()
     parser.add_argument("--url", required=True, help="Youtube URL to download video.", type=str)
-    parser.add_argument("--font_url", default='https://www.dafontfree.net/data/36/t/128322/typewriter-serial-heavy-regular.ttf', help="URL font will download.", type=str)
+    parser.add_argument("--font_url", default='https://www.wfonts.com/download/data/2016/01/08/typewriter-serial-heavy/typewriter-serial-heavy-regular.ttf', help="URL font will download.", type=str)
     parser.add_argument("--num_parts", required=True, help="Number parts.", type=int)
     parser.add_argument("--title", required=True, help="Number parts.", type=str)
     args = parser.parse_args()
