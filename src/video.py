@@ -1,5 +1,5 @@
 from multiprocessing import cpu_count
-from random import randrange
+from random import randrange, uniform
 from time import strptime
 from typing import List, Tuple
 from ffmpeg import input, output, overwrite_output, run, probe
@@ -61,12 +61,16 @@ class Video:
         run(audio_stream)
 
     def reup(self, video_path: str, font_path: str, subtitle_path: str, start_time: int, end_time: int, output_path: str, titles: List[str], num_part: str, speed_up: float = 1.1):
+        brightness = round(uniform(0.01, 0.1), 2)
+        contrast = round(uniform(1, 1.2), 2)
+
         video_input = input(video_path, ss=start_time, to=end_time)
 
         # Edit video
         audio = video_input.audio.filter('atempo', speed_up)
         video = video_input.video \
                     .setpts(f'(PTS-STARTPTS)/{speed_up}') \
+                    .filter('eq', brightness=brightness, contrast=contrast) \
                     .filter('scale', 'iw*1.5', 'ih*1.5') \
                     .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 1080, 'ih') \
                     .filter('pad', 1080, 1920, '(ow-iw)/2', '(oh-ih)/2') \
