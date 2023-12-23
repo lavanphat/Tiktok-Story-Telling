@@ -39,9 +39,11 @@ class Whisper:
         with open(subtitle_path, "r") as f:
             html = f.read()
         
+        if not html.strip():
+            html = '1\n00:00:00,000 --> 00:00:05,000'
         html = html.replace('<u>', '<b>').replace('</u>', '</b>')
 
         with open(subtitle_path, "w") as f:
             f.write(html)
 
-# Whisper('small').format_subtitle('output/my_(27f)_friend_(27f)_of_15_years_didn’t_invite_me_to_her_wedding,_but_invited_my_parents._is_this_the_end_of_our_friendship?/audio-part-1.srt')
+# Whisper('small').format_subtitle('output/audio.srt')
