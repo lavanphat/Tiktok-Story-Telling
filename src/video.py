@@ -1,6 +1,5 @@
 from multiprocessing import cpu_count
 from random import randrange, uniform
-from time import strptime
 from typing import List, Tuple
 from ffmpeg import input, output, overwrite_output, run, probe
 from pydub import AudioSegment
@@ -11,7 +10,7 @@ class Video:
         Get information about a video file.
 
         Args:
-            video_path (str): The path to the video file.
+            path (str): The path to the video file.
 
         Returns:
             dict: A dictionary containing information about the video file, including width, height, bit rate, and duration.
@@ -19,16 +18,10 @@ class Video:
         info = probe(path)
         video_stream = next(
             (stream for stream in info['streams'] if stream['codec_type'] == 'video'), None)
-        audio_stream = next(
-            (stream for stream in info['streams'] if stream['codec_type'] == 'audio'), None)
-        try:
-            duration = float(audio_stream['duration'])
-        except Exception:
-            print('MP4 default metadata not found')
-            duration = (strptime(audio_stream['DURATION'], '%H:%M:%S.%f') - min).total_seconds()
         if video_stream is None:
             return {'path': path, 'duration': duration, 'width': 0, 'height': 0}
 
+        duration = float(video_stream['duration'])
         width = int(video_stream['width'])
         height = int(video_stream['height'])
         return {'path': path, 'width': width, 'height': height, 'duration': duration}
@@ -51,23 +44,23 @@ class Video:
         video = overwrite_output(video)
         run(video)
 
-    def split_audio(self, video_path: str, start_time: int, end_time: int, output_path: str, speed_up: float = 1.1):
-        video_input = input(video_path, ss=start_time, to=end_time)
+    def split_audio(self, audio_path: str, start_time: int, end_time: int, output_path: str, speed_up: float = 1.1):
+        audio_input = input(audio_path, ss=start_time, to=end_time)
 
         # Render audio
-        audio = video_input.audio.filter('atempo', speed_up)
+        audio = audio_input.filter('atempo', speed_up)
         audio_stream = output(audio, filename=output_path)
         audio_stream = overwrite_output(audio_stream)
         run(audio_stream)
 
-    def reup(self, video_path: str, font_path: str, subtitle_path: str, start_time: int, end_time: int, output_path: str, titles: List[str], num_part: str, speed_up: float = 1.1):
+    def reup(self, video_path: str, audio_path: str, font_path: str, subtitle_path: str, start_time: int, end_time: int, output_path: str, titles: List[str], num_part: str, speed_up: float = 1.1):
         brightness = round(uniform(0.01, 0.1), 2)
         contrast = round(uniform(1, 1.2), 2)
 
         video_input = input(video_path, ss=start_time, to=end_time)
 
         # Edit video
-        audio = video_input.audio.filter('atempo', speed_up)
+        audio = input(audio_path)
         video = video_input.video \
                     .setpts(f'(PTS-STARTPTS)/{speed_up}') \
                     .filter('eq', brightness=brightness, contrast=contrast) \

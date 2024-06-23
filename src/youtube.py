@@ -3,13 +3,14 @@ from pytube import YouTube
 
 class PyYoutube:
   def download_video(self, url: str, output_path: str):
-    video = YouTube(url).streams.get_highest_resolution()
+    streams = YouTube(url).streams
 
-    title = video.title.replace(' ', '-').lower()
-    filename = f"{title}.mp4"
+    video_stream = streams.filter(only_video =True, file_extension='mp4', resolution='720p').first()
+    audio_stream = streams.filter(only_audio=True, file_extension='mp4').first()
 
-    makedirs(output_path, exist_ok=True)
-    video.download(output_path=output_path, filename=filename)
+    title = video_stream.title.replace(' ', '-').lower()
+    video_filename = video_stream.download(output_path=output_path, filename=f"{title}.mp4")
+    audio_filename = audio_stream.download(output_path=output_path, filename=f"{title}.mp3")
 
-    return f"{output_path}/{filename}"
+    return video_filename, audio_filename
   

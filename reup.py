@@ -6,7 +6,6 @@ from src.font import Font
 from src.openai_whisper import Whisper
 from pathlib import Path
 from argparse import ArgumentParser
-from ffmpeg import input, run, output, overwrite_output
 from PIL import ImageFont
 
 
@@ -69,12 +68,13 @@ def main():
     # Download video
     py_youtube = PyYoutube()
     log.info(f"Downloading video")
-    video_path = py_youtube.download_video(args.url, f"{HOME}/backgrounds")
+    video_path, audio_path = py_youtube.download_video(args.url, f"{HOME}/backgrounds")
     log.info(f"Downloaded video")
 
     # Render video
     video = Video()
     video_info = video.get_info(video_path)
+    log.info(video_info)
     duration = video_info['duration']
     part_duration = duration / args.num_parts
 
@@ -85,18 +85,19 @@ def main():
         end_time = min((i + 1) * part_duration, duration)
 
         # Split audio from video
-        audio_path = f"{output_dir}/audio.mp3"
-        video.split_audio(video_path, start_time, end_time, audio_path)
+        audio_output_path = f"{output_dir}/audio.mp3"
+        video.split_audio(audio_path, start_time, end_time, audio_output_path)
         
         # Create subtitles for content audio
-        whisper.srt_create(audio_path, output_dir)
-        subtitle_path = audio_path.replace('mp3', 'srt')
+        whisper.srt_create(audio_output_path, output_dir)
+        subtitle_path = audio_output_path.replace('mp3', 'srt')
         whisper.format_subtitle(subtitle_path)
 
         # Edit video
         output_path = f"{output_dir}/{args.title} part {i + 1}.mp4"
         video.reup(
             video_path,
+            audio_output_path,
             font_path,
             subtitle_path,
             start_time,
