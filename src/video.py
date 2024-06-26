@@ -53,7 +53,7 @@ class Video:
         audio_stream = overwrite_output(audio_stream)
         run(audio_stream)
 
-    def reup(self, video_path: str, audio_path: str, font_path: str, subtitle_path: str, start_time: int, end_time: int, output_path: str, titles: List[str], num_part: str, speed_up: float = 1.1):
+    def reup(self, video_path: str, audio_path: str, font_path: str, subtitle_path: str, thumbnail_path:str, start_time: int, end_time: int, output_path: str, titles: List[str], num_part: str, speed_up: float = 1.1):
         brightness = round(uniform(0.01, 0.1), 2)
         contrast = round(uniform(1, 1.2), 2)
 
@@ -61,14 +61,16 @@ class Video:
 
         # Edit video
         audio = input(audio_path)
+        thumbnail = input(thumbnail_path).filter(filter_name='scale', width='1080', height='420')
         video = video_input.video \
                     .setpts(f'(PTS-STARTPTS)/{speed_up}') \
-                    .filter('eq', brightness=brightness, contrast=contrast) \
-                    .filter('scale', 'iw*1.5', 'ih*1.5') \
-                    .crop('(in_w-out_w)/2', '(in_h-out_h)/2', 1080, 'ih') \
-                    .filter('pad', 1080, 1920, '(ow-iw)/2', '(oh-ih)/2') \
-                    .drawtext(num_part, '(w-tw)/2', 'h-(420/2)', fontfile=font_path, fontcolor='white', fontsize=100)  \
-                    .filter('subtitles', subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold')
+                    .filter(filter_name='eq', brightness=brightness, contrast=contrast) \
+                    .filter(filter_name='scale', width='iw*1.5', height='ih*1.5') \
+                    .crop(x='(in_w-out_w)/2', y='(in_h-out_h)/2', width=1080, height='ih') \
+                    .filter(filter_name='pad', width=1080, height=1920, x='(ow-iw)/2', y='(oh-ih)/2') \
+                    .overlay(thumbnail, x='(main_w-overlay_w)/2', y='main_h-420') \
+                    .drawtext(text=num_part, x='(w-text_w)/2', y='h-(420/2)', fontfile=font_path, fontcolor='white', fontsize=100)  \
+                    .filter(filter_name='subtitles', filename=subtitle_path, force_style='Alignment=10,BorderStyle=7,Outline=2,Blur=15,Fontsize=15,FontName=Lexend Bold')
     
         fontsize = 75
         padding_top = (1920 - 720 * 1.5)/2

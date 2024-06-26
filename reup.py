@@ -66,9 +66,9 @@ def main():
     log.info(f"OpenAI-Whisper model loaded successfully (small)")
 
     # Download video
-    py_youtube = PyYoutube()
+    py_youtube = PyYoutube(args.url)
     log.info(f"Downloading video")
-    video_path, audio_path = py_youtube.download_video(args.url, f"{HOME}/backgrounds")
+    video_path, audio_path, thumbnail_path = py_youtube.download_video(f"{HOME}/backgrounds")
     log.info(f"Downloaded video")
 
     # Render video
@@ -100,6 +100,7 @@ def main():
             audio_output_path,
             font_path,
             subtitle_path,
+            thumbnail_path,
             start_time,
             end_time,
             output_path,
