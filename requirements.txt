@@ -12,5 +12,5 @@ mkdocs-material
 openai-whisper
 pydub
 nltk
-pytube
+pytubefix
 praw
